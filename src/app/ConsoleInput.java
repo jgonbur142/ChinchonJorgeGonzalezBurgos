@@ -354,7 +354,7 @@ public class ConsoleInput {
 		return value;
 	}
 	
-	public byte readFloatInRange(byte lowerBound, byte upperBound) {// devuelve un byte cuyo valor esta en el rango [ lowerBound, upperBound ]
+	public byte readByteInRange(byte lowerBound, byte upperBound) {// devuelve un byte cuyo valor esta en el rango [ lowerBound, upperBound ]
 		byte value;
 		
 		if (lowerBound > upperBound) {  //si el usuario introduce primero un numero mayor que el segundo:
@@ -419,6 +419,10 @@ public class ConsoleInput {
 		}while(input!=Character.toLowerCase(affirmativeValue) && input!=Character.toLowerCase(negativeValue));
 		
 		return input == Character.toLowerCase(affirmativeValue);
+	}
+	
+	public void showMessage(String message) {
+		System.out.println(message);
 	}
 	
 	
