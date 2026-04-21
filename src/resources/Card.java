@@ -12,4 +12,21 @@ public class Card {
 	public int cardValue() {
 		return number.getValue();
 	}
+
+	public Number getNumber() {
+		return number;
+	}
+
+	public Suit getSuit() {
+		return suit;
+	}
+
+	@Override
+	public String toString() {
+		return String.format("Número: %d, Palo: %s",number,suit);
+	}
+	
+	
+	
+	
 }

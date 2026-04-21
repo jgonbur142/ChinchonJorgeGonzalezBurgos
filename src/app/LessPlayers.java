@@ -1,5 +1,5 @@
 package app;
 
-public class LessPlayers extends Match {
+public class LessPlayers extends Match{
 
 }
