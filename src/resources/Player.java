@@ -25,6 +25,7 @@ public class Player implements IPlayer{
 		}		
 	}
 
+	//TODO: calcular puntuación
 	@Override
 	public void calculateScore() {
 		/*

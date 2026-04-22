@@ -1,5 +1,5 @@
 package resources;
-
+//TODO: lógica de la IA
 public class IA extends Player{
 	
 	public IA() {

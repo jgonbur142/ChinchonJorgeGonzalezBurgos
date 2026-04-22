@@ -12,37 +12,28 @@ public class Menu {
 	}
 	
 	public void startGame() {
-		String option="";
+		Match match = new Match();
+		int option;
 		
 		do {
 			console.showMessage("");
 			showCover();
-			console.showMessage("-----------------------");
-			console.showMessage("- 1. Dos jugadores ----");
-			console.showMessage("- 2. Tres jugadores ---");
-			console.showMessage("- 3. Cuatro jugadores -");
-			console.showMessage("- 4. Salir ------------");
+			console.showMessage("--------------------------------");
+			console.showMessage("- 1. Un jugador ----------------"); //1 jugador + IA
+			console.showMessage("- 2. Dos jugadores (sin IA) ----"); //2 jugadores o 2 jugadores + IA
+			console.showMessage("- 3. Dos jugadores (con IA) ----");
+			console.showMessage("- 4. Tres jugadores (sin IA) ---");
+			console.showMessage("- 5. Tres jugadores (con IA) ---");
+			console.showMessage("- 6. Cuatro jugadores (sin IA) -");
+			console.showMessage("- 7. Cuatro jugadores (con IA) -");
+			console.showMessage("- 8. Cinco jugadores (sin IA) --");
+			console.showMessage("- 9. Salir ---------------------");
 			console.showMessage("");
 			
-			option = console.readString();
+			option = console.readInt();
+			match.createMatch(option);
 			
-			switch (option) {
-			case "1" -> {
-				//iniciar partida (Match debe crear una LessPlayer)
-			}
-			case "2" -> {
-				//iniciar partida (Match debe crear un MorePlayers de 3 jugadores)
-			}
-			case "3" ->{
-				//iniciar partida (Match debe crera un MorePlayers de 4 jugadores)
-			}
-			case "4" ->{
-				console.showMessage("Saliendo...");
-			}
-			default -> console.showMessage("Opción no válida");
-			}
-			
-		}while (!option.equals("4"));
+		}while (option!=5);
 	}
 	
 	private void showCover() {
