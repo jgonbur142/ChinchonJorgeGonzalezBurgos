@@ -10,64 +10,42 @@ import resources.Player;
 public class NoIAMatch extends Match{
 	
 	// constructor para 2 jugadores sin IA
-	public NoIAMatch(String namePlayer1, String namePlayer2) {
+	public NoIAMatch(String name1, String name2) {
 		deck = new Deck();
-		player1 = new Player(namePlayer1);
-		player2 = new Player(namePlayer2);
+		players.add(new Player(name1));
+		players.add(new Player(name2));
 	}
 	
 	// constructor para 3 jugadores sin IA
-	public NoIAMatch(String namePlayer1,String namePlayer2,String namePlayer3) {
+	public NoIAMatch(String name1,String name2,String name3) {
 		deck = new Deck();
-		player1 = new Player(namePlayer1);
-		player2 = new Player(namePlayer2);
-		player3 = new Player(namePlayer3);
+		players.add(new Player(name1));
+		players.add(new Player(name2));
+		players.add(new Player(name3));
 	}
 	
 	// constructor para 4 jugadores sin IA
-	public NoIAMatch(String namePlayer1,String namePlayer2,String namePlayer3,String namePlayer4) {
+	public NoIAMatch(String name1,String name2,String name3,String name4) {
 		deck = new Deck();
-		player1 = new Player(namePlayer1);
-		player2 = new Player(namePlayer2);
-		player3 = new Player(namePlayer3);
-		player4 = new Player(namePlayer4);
+		players.add(new Player(name1));
+		players.add(new Player(name2));
+		players.add(new Player(name3));
+		players.add(new Player(name4));
 	}
 	
 	// constructor para 5 jugadores sin IA
-	public NoIAMatch(String namePlayer1,String namePlayer2,String namePlayer3,String namePlayer4,String namePlayer5) {
+	public NoIAMatch(String name1,String name2,String name3,String name4,String name5) {
 		deck = new Deck();
-		player1 = new Player(namePlayer1);
-		player2 = new Player(namePlayer2);
-		player3 = new Player(namePlayer3);
-		player4 = new Player(namePlayer4);
-		player5 = new Player(namePlayer5);
+		players.add(new Player(name1));
+		players.add(new Player(name2));
+		players.add(new Player(name3));
+		players.add(new Player(name4));
+		players.add(new Player(name5));
 	}
 
 	public Deck getDeck() {
 		return deck;
 	}
-
-	public Player getPlayer1() {
-		return player1;
-	}
-
-	public Player getPlayer2() {
-		return player2;
-	}
-
-	public Player getPlayer3() {
-		return player3;
-	}
-
-	public Player getPlayer4() {
-		return player4;
-	}
-
-	
-	
-		
-		
-	
 	
 	
 }

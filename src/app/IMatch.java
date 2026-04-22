@@ -1,5 +1,7 @@
 package app;
 
+import resources.Player;
+
 public interface IMatch {
 
 	/**
@@ -23,10 +25,15 @@ public interface IMatch {
 	 * Un jugador roba una carta durante su turno y descarta una carta de su mano.
 	 * Un jugador puede decidir cerrar ronda en su turno si tiene una combinación de cartas que lo permita.
 	 */
-	void playTurn();
+	boolean playTurn(Player player,Integer turn);
+	
+	boolean canEndRound(Player player);
+	
+	void eliminatePlayer();
 
 	/**
 	 * Muestra los resultados de todos los jugadores al terminar una ronda
 	 */
 	void showRoundResults();
+	
 }

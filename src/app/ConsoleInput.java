@@ -425,6 +425,10 @@ public class ConsoleInput {
 		System.out.println(message);
 	}
 	
+	public void showFormattedMessage(String format, Object... args) {
+		System.out.printf(format,args);
+	}
+	
 	
 	
 }

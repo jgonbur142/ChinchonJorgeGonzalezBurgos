@@ -6,6 +6,7 @@ public class Player implements IPlayer{
 
 	private String name;
 	private List<Card> hand;
+	private int score;
 	
 	public Player(String name) {
 		this.name=name;
@@ -32,6 +33,7 @@ public class Player implements IPlayer{
 		 * calcular puntuación
 		 * (hay que tener en cuenta las combinaciones 
 		 * en la mano, cuál puntúa menos y elegirla)
+		 * 
 		 */
 	}
 
@@ -48,6 +50,16 @@ public class Player implements IPlayer{
 	@Override
 	public String getName() {
 		return name;
+	}
+
+	@Override
+	public int getScore() {
+		return score;
+	}
+
+	@Override
+	public void setScore(int score) {
+		this.score = score;
 	}
 
 	@Override

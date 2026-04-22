@@ -37,4 +37,15 @@ public interface IPlayer {
 	 */
 	String getName();
 	
+	/**
+	 * Comprueba la puntuación del jugador
+	 * @return puntuación del jugador
+	 */
+	int getScore();
+	
+	/**
+	 * Configura la puntuación del jugador
+	 */
+	void setScore(int score);
+	
 }

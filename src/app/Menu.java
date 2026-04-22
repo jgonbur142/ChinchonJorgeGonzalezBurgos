@@ -33,7 +33,7 @@ public class Menu {
 			option = console.readInt();
 			match.createMatch(option);
 			
-		}while (option!=5);
+		}while (option!=9);
 	}
 	
 	private void showCover() {
