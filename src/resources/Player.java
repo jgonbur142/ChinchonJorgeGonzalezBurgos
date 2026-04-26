@@ -1,5 +1,6 @@
 package resources;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Player implements IPlayer{
@@ -10,6 +11,8 @@ public class Player implements IPlayer{
 	
 	public Player(String name) {
 		this.name=name;
+		this.hand = new ArrayList<>();
+		score=0;
 	}
 	
 	@Override
@@ -29,12 +32,13 @@ public class Player implements IPlayer{
 	//TODO: calcular puntuación
 	@Override
 	public void calculateScore() {
-		/*
-		 * calcular puntuación
-		 * (hay que tener en cuenta las combinaciones 
-		 * en la mano, cuál puntúa menos y elegirla)
-		 * 
-		 */
+		int points=0;
+		
+		for (Card c : hand) {
+			points += c.getNumber().getValue();
+		}
+		
+		score += points;
 	}
 
 	@Override
@@ -45,6 +49,12 @@ public class Player implements IPlayer{
 	@Override
 	public List<Card> getHand() {
 		return hand;
+	}
+	
+	public void showHand() {
+		for (int i = 0;i<hand.size();i++) {
+			System.out.printf("[%d] %s\n",i,hand.get(i));
+		}
 	}
 
 	@Override

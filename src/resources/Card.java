@@ -23,7 +23,7 @@ public class Card {
 
 	@Override
 	public String toString() {
-		return String.format("Número: %d, Palo: %s",number,suit);
+		return String.format("Número: %d, Palo: %s",number.getValue(),suit.getSymbol());
 	}
 	
 	

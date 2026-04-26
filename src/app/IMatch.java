@@ -26,9 +26,16 @@ public interface IMatch {
 	 * Un jugador puede decidir cerrar ronda en su turno si tiene una combinación de cartas que lo permita.
 	 */
 	boolean playTurn(Player player,Integer turn);
-	
+	/**
+	 * 
+	 * @param player
+	 * @return
+	 */
 	boolean canEndRound(Player player);
 	
+	/**
+	 * 
+	 */
 	void eliminatePlayer();
 
 	/**

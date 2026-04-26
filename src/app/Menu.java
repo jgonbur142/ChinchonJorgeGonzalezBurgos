@@ -13,6 +13,7 @@ public class Menu {
 	
 	public void startGame() {
 		Match match = new Match();
+		IMatch current;
 		int option;
 		
 		do {
@@ -31,7 +32,11 @@ public class Menu {
 			console.showMessage("");
 			
 			option = console.readInt();
-			match.createMatch(option);
+			current = match.createMatch(option);
+			
+			if (current != null) {
+				current.start();
+			}
 			
 		}while (option!=9);
 	}
