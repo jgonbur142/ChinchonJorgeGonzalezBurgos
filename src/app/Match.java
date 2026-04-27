@@ -167,20 +167,16 @@ public class Match implements IMatch{
 		
 		boolean endRound = false;
 		int turnCount = 1;
-		winner = null;
-		sevenClosed = false;
-		chinchonWin = false;
-		leftCard = null;
 		discardPile = new ArrayList<>();
 		
 		distributeCards();
 		
 		while(!endRound) {
+			console.showFormattedMessage("----- Turno %d -----\n", turnCount);;
 			for (Player p : players) {
 				playTurn(p, turnCount);
 				
-				if (turnCount>1 && canEndRound(p)) {
-					winner = p;
+				if (turnCount>1 && canEndRound(p,false)) { //problema de flujo, después del turno 1 asume la respuesta "si" a "¿quieres cerrar ronda?"
 					endRound = true;
 				}
 			}
@@ -193,12 +189,12 @@ public class Match implements IMatch{
 	}
 	
 	@Override
-	public boolean playTurn(Player player,Integer turn) {
+	public void playTurn(Player player,Integer turn) {
 		
 		if (player instanceof IA) {
-			return playTurnIA(player,turn);
+			playTurnIA(player,turn);
 		}else {
-			return playTurnPerson(player,turn);
+			playTurnPerson(player,turn);
 		}
 	}
 	
@@ -222,6 +218,7 @@ public class Match implements IMatch{
 		int random = (int) (Math.random()*ia.getHand().size());
 		
 		console.showMessage("Turno de la IA");
+		checkIfDeckIsEmpty();
 		
 		//decisón de robar:
 		ia.draw(deck.getCards().remove(0));
@@ -239,7 +236,6 @@ public class Match implements IMatch{
 
 	private boolean playTurnPerson(Player player,Integer turn) {
 		int option;
-		boolean choise;
 		Card toDiscard, drawCard; //la carta que se quiere descartar
 		boolean hasClosed = false;
 		
@@ -263,12 +259,7 @@ public class Match implements IMatch{
 		
 		//segunda acción del turno: cerrar (si puede)
 		if (turn>1) {
-			console.showMessage("¿Quieres cerrar la ronda? (S/N)");
-			choise = console.readBooleanUsingChar('s', 'n');
-			
-			if (choise) {
-				hasClosed = canEndRound(player);
-			}
+			hasClosed = canEndRound(player,true);
 		}
 		
 		if (!hasClosed) {
@@ -331,9 +322,9 @@ public class Match implements IMatch{
 	}
 	
 	@Override
-	public boolean canEndRound(Player player) {// true si el jugador reune las condiciones para cerrar ronda
+	public boolean canEndRound(Player player, boolean beforeDiscard) {// true si el jugador reune las condiciones para cerrar ronda
 		
-		boolean attempt = true, close = false;
+		boolean attempt=false,close=false,choise;
 		sevenClosed=false;
 		chinchonWin=false;
 		leftCard=null;
@@ -341,6 +332,20 @@ public class Match implements IMatch{
 		List<Card> selected = new ArrayList<>();
 		List<Card> remaining = new ArrayList<>(player.getHand());
 		Card discard;
+		
+		if (player instanceof IA) {//para que la IA nunca cierre (provisional)
+			return false;
+		}
+		
+		//si la llamada a canEndRound la hacen antes de que el jugador haya descartado, entrará en el if
+		if (beforeDiscard) {//así evito que se pregunte dos veces en la misma ronda al usuario si quiere cerrar (solo se puede cerrar antes de descartar)
+			console.showMessage("¿Quieres cerrar la ronda? (S/N)");
+			choise = console.readBooleanUsingChar('s', 'n');		
+			
+			if (choise) {
+				attempt = true;
+			}
+		}
 		
 		while (!close && attempt) {
 				console.showMessage("¿Cierras con 6 o 7 cartas?");

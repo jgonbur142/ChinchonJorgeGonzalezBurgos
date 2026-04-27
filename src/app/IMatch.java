@@ -25,13 +25,13 @@ public interface IMatch {
 	 * Un jugador roba una carta durante su turno y descarta una carta de su mano.
 	 * Un jugador puede decidir cerrar ronda en su turno si tiene una combinación de cartas que lo permita.
 	 */
-	boolean playTurn(Player player,Integer turn);
+	void playTurn(Player player,Integer turn);
 	/**
 	 * 
 	 * @param player
 	 * @return
 	 */
-	boolean canEndRound(Player player);
+	boolean canEndRound(Player player, boolean beforeDiscard);
 	
 	/**
 	 * 
