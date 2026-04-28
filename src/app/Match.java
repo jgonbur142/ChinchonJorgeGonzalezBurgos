@@ -302,17 +302,17 @@ public class Match implements IMatch{
 	}
 	
 	private boolean isValidCombination(List<Card> cards) { //falta comprobar si el jugador tiene chinchón
-		boolean sameNumber = true;
-		int firstNum = cards.get(0).getNumber().getValue();
+		boolean sameNumber = false;
+		int firstCard = cards.get(0).getNumber().getValue();
 		
 		if (cards.size()<3) {
 			return false;
 		}
 		
 		//compruebo si son el mismo número
-		for (Card c : cards) {
-			if (c.getNumber().getValue() != firstNum) {
-				sameNumber = false;
+		for (int i = 0;i<cards.size();i++) {
+			if (cards.get(i).getNumber().getValue() == firstCard) {
+				sameNumber = true;
 			}
 		}
 		
@@ -321,24 +321,68 @@ public class Match implements IMatch{
 		
 	}
 	
+	private boolean checkIfCanClose(Player player,int combine,List<Card> remaining,List<Card> selected) {
+		boolean canClose = false;
+		int index;
+		Card discard;
+		
+		if (combine == 7) {				
+			
+			sevenClosed=true;
+			chinchonWin = isSequence(selected);
+			canClose = true;
+			player.discard(remaining.get(0));
+			discardPile.add(remaining.get(0));
+			
+		}else {//si se combina con 6
+			
+			if (remaining.get(0).getNumber().getValue() <= 5) {
+				
+				console.showFormattedMessage("Cierre de 6 válido. Elige qué carta descartar (0-1) (%s - %s)\\n", remaining.get(0),remaining.get(1));
+				index = console.readIntInRange(0, 1);
+				discard = remaining.remove(index);
+				leftCard = remaining.get(0);
+				
+				if (leftCard.getNumber().getValue()<=5) {
+					player.discard(discard);
+					discardPile.add(discard);
+					canClose = true;
+				}else {
+					console.showMessage("ERROR: La carta que queda al intentar cerrar debe ser menor o igual que 5");
+				}
+				
+			}
+			remaining = new ArrayList<>(player.getHand());
+			remaining.removeAll(selected);
+			leftCard = remaining.get(0);
+			
+			if (leftCard.getNumber().getValue()<=5) {
+				canClose = true;				
+			}else {
+				console.showMessage("No puedes cerrar si la carta que sobra no es menor o igual que 5");
+			}
+		}
+		return canClose;
+	}
+	
 	@Override
 	public boolean canEndRound(Player player, boolean beforeDiscard) {// true si el jugador reune las condiciones para cerrar ronda
 		
-		boolean attempt=false,close=false,choise;
+		boolean attempt=false,close=false,choise,group=false;
 		sevenClosed=false;
 		chinchonWin=false;
 		leftCard=null;
 		int combine, index=0;
 		List<Card> selected = new ArrayList<>();
 		List<Card> remaining = new ArrayList<>(player.getHand());
-		Card discard;
+		List<Card> combinedHand = new ArrayList<>();
 		
 		if (player instanceof IA) {//para que la IA nunca cierre (provisional)
 			return false;
 		}
 		
 		//si la llamada a canEndRound la hacen antes de que el jugador haya descartado, entrará en el if
-		if (beforeDiscard) {//así evito que se pregunte dos veces en la misma ronda al usuario si quiere cerrar (solo se puede cerrar antes de descartar)
+		if (!beforeDiscard) {//así evito que se pregunte dos veces en la misma ronda al usuario si quiere cerrar 
 			console.showMessage("¿Quieres cerrar la ronda? (S/N)");
 			choise = console.readBooleanUsingChar('s', 'n');		
 			
@@ -350,15 +394,47 @@ public class Match implements IMatch{
 		while (!close && attempt) {
 				console.showMessage("¿Cierras con 6 o 7 cartas?");
 				combine = console.readIntInRange(6, 7);
-				
-				for (int i=0;i<combine;i++) {
-					player.showHand();
-					console.showFormattedMessage("Elige la %dº carta (0-6)", i+1);
-					index=console.readIntInRange(0, 6);
-					selected.add(remaining.remove(index));
+				/*TODO:
+				 * El flujo del bucle debe ser:
+				 * 	1º -> elige carta para añadir al grupo (o cierra grupo)
+				 *  2º -> cuando cierra grupo, comprueba si es una combinación válida
+				 *  3º -> si es una combinación válida, mover las cartas de la mano a "mano combinada"
+				 *  4º -> vuelve a preguntar la carta a añadir, pero ahora solo con las cartas en la mano, quitando las que ya están combinadas
+				 *  5º 
+				 *  	si combine == 6 -> cuando quede una carta, valida la combinación automáticamente
+				 *  	si combine == 7 -> cuando no queden cartas, valida la combinación automáticamente
+				 *  
+				 *   
+				 *   COMPROBACIONES:
+				 *   - 
+				 * 
+				 */
+				while (!group) {
+						combinedHand.toString();
+						//player.showHand();
 					
+						//hay que poner una opción de "hasta aquí el primer grupo", para que el usuario pueda hacer combinaciones pequeñas
+						console.showMessage("Elige una carta (0-6) (7 cuando ya hayas seleccionado el grupo)");
+						index=console.readIntInRange(0, 7);
+						
+						
+						
+						//si el usuario decide que ya ha elegido el primer grupo, se valida que dicho grupo es una combinación válida
+						if (index == 7) {
+							//paso por parámetro la mano temporal a isValidCombination
+							if (!isValidCombination(combinedHand)) {//si la mano temporal no es válida, la vacía
+								
+								console.showMessage("ERROR: No se ha podido cerrar el grupo");
+								combinedHand.clear();
+							}
+						}else {
+							//cada carta elegida hay que añadirla a una mano temporal
+							combinedHand.add(player.getHand().get(index));
+						}						
+						
+						selected.add(remaining.remove(index));
 				}
-				
+				/*
 				if (isValidCombination(selected)) {
 					
 					if (combine == 7) {				
@@ -401,6 +477,7 @@ public class Match implements IMatch{
 					}else {
 						console.showMessage("Combinación no válida. Deben tener el mismo número (3 o más) o ser una escalera válida del mismo palo (3 o más)");
 					}
+					*/
 		}
 		
 		return close;
@@ -548,11 +625,9 @@ public class Match implements IMatch{
 	 * TODO: 
 	 * Refactorizar 
 	 * Optimizar
-	 * Actualizar UML
+	 * Actualizar UML 
 	 * 
-	 * Que se puedan hacer combinaciones válidas de cartas iguales (no solo combinaciones de una escalera de 6 o 7)
-	 * Corregir flujo: me dice cuantas quiero descartar despues de negar por segunda vez que no quiero cerrar
-	 * 
+	 * - Hacer que se pueda cerrar ronda. Actualmente no detecta las combinaciones.
 	 */
 	
 }
