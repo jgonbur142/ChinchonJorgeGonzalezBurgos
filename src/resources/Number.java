@@ -1,5 +1,8 @@
 package resources;
 
+/**
+ * Representa los números que puede tener una carta
+ */
 public enum Number {
 	UNO(1),
 	DOS(2),

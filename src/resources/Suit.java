@@ -1,5 +1,8 @@
 package resources;
 
+/**
+ * Representa el palo que puede tener una carta
+ */
 public enum Suit {
 	COINS("📀"),
 	SWORD("🗡️"),

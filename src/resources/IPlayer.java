@@ -15,10 +15,35 @@ public interface IPlayer {
 	 */
 	void discard(Card card);
 	
-	/**
-	 * Comprueba las combinaciones en la mano y la puntuación que se consigue con cada combinación
-	 */
-	void calculateScore();
+//	
+//	/**
+//	 * Comprueba las combinaciones en la mano y la puntuación que se consigue con cada combinación
+//	 */
+//	void calculateScore();
+//	
+//	/**
+//	 * Calcula las combinaciones posibles en la mano del jugador
+//	 */
+//	void calculateCardCombinations();
+//	
+//	/**
+//	 * Busca cartas consecutivas del mismo palo.
+//	 * Mueve las cartas consecutivas a la mano de combinación.
+//	 * Elimina las cartas de la mano original
+//	 */
+//	void straightCombination();
+//	
+//	/**
+//	 * Busca cartas iguales en el mazo, mueve a la mano temporal las que encuentre y las elimina de la principal
+//	 */
+//	void sameCombination();
+//	
+//	/**
+//	 * Se encarga solo de ordenar las cartas en la mano por el número
+//	 */
+//	void sortCardsInHand();
+//	
+	
 	
 	/**
 	 * Vacía de cartas la mano del jugador

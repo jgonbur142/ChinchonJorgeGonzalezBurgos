@@ -1,5 +1,7 @@
 package resources;
-
+/**
+ * Representa una carta con número y palo
+ */
 public class Card {
 	private Number number;
 	private Suit suit;

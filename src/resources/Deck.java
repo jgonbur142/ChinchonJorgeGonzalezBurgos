@@ -3,7 +3,9 @@ package resources;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
+/**
+ * Representa una baraja con las cartas de la baraja española, menos los 8 y 9
+ */
 public class Deck {
 	private List<Card> cards;
 	

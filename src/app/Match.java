@@ -277,7 +277,7 @@ public class Match implements IMatch{
 		
 	}
 	
-	//valido por separado si es una escalera para reciclar el codigo a la hora de comprobar si el jugador tiene chinchón
+	//REFACTORIZANDO EN PLAYER
 	private boolean isSequence(List<Card> cards) {
 		if (cards.size()<3) {
 			return false;
@@ -300,7 +300,7 @@ public class Match implements IMatch{
 		}
 		return true;
 	}
-	
+	//REFACTORIZANDO EN PLAYER
 	private boolean isValidCombination(List<Card> cards) { //falta comprobar si el jugador tiene chinchón
 		boolean sameNumber = false;
 		int firstCard = cards.get(0).getNumber().getValue();
@@ -521,7 +521,7 @@ public class Match implements IMatch{
 		}
 		
 	}
-	
+	//REFACTORIZANDO EN PLAYER
 	private int calculatePlayerScore(Player player) {
 		List<Card> remaining = new ArrayList<>(player.getHand());
 		List<Card> selectedCards;
@@ -583,7 +583,7 @@ public class Match implements IMatch{
 		return sum;
 		
 	}
-	
+	//REFACTORIZANDO EN PLAYER
 	private int calculateIAScore(Player player) {
 		List<Card> hand = new ArrayList<>(player.getHand()),sameValueCards,suitCards;
 		int points=0;
