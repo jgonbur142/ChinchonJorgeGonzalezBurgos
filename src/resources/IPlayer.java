@@ -14,7 +14,7 @@ public interface IPlayer {
 	 * @param card la carta en mano que quiere descartar
 	 */
 	void discard(Card card);
-	
+	   
 //	
 //	/**
 //	 * Comprueba las combinaciones en la mano y la puntuación que se consigue con cada combinación

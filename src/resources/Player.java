@@ -66,6 +66,8 @@ public class Player implements IPlayer{
 		//busca si tiene iguales en la mano
 		sameCombination();
 		
+		//asdasdasd
+		
 		
 	}
 	

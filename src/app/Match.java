@@ -406,7 +406,7 @@ public class Match implements IMatch{
 				 *  
 				 *   
 				 *   COMPROBACIONES:
-				 *   - 
+				 *   -    
 				 * 
 				 */
 				while (!group) {
