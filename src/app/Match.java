@@ -3,12 +3,10 @@ package app;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-import java.util.stream.Collectors;
 import resources.Card;
 import resources.Deck;
 import resources.IA;
 import resources.Player;
-import resources.Suit;
 
 public class Match implements IMatch{
 	
@@ -18,11 +16,8 @@ public class Match implements IMatch{
 	
 	private String name1,name2,name3,name4,name5;
 	private int maxScore;
-	
 	private Player winner;
-	private boolean sevenClosed;
 	private boolean chinchonWin;
-	private Card leftCard;
 	
 	private Scanner kb = new Scanner(System.in);
 	private ConsoleInput console = new ConsoleInput(kb);
@@ -126,508 +121,210 @@ public class Match implements IMatch{
 
 	@Override
 	public void start() {
-		
-		configureMaxScore();
-		
-		//mientras haya jugadores y nadie haya sacado chinchón
-		while (players.size() > 1 && !chinchonWin) {
+		while (players.size()>1 && !chinchonWin) {
 			playNewRound();
 			eliminatePlayer();
 		}
 		
 		if (chinchonWin) {
-			console.showFormattedMessage("¡Ha salido chinchón! El ganador es: %s\n", winner.getName());
+			console.showFormattedMessage("CHINCHÓN... El ganador es %s\n", winner.getName());
 		}else {
 			winner = players.get(0);
-			console.showFormattedMessage("El ganador es: %s\n", winner.getName());
+			console.showFormattedMessage("El ganador es %s\n", winner.getName());
 		}
 	}
-
+	
 	@Override
 	public void distributeCards() {
 		deck = new Deck();
 		deck.shuffle();
 		
-		for (Player p : players) {//limpiar las manos de los jugadores
-			p.cleanHand();
+		for (Player player : players) {
+			player.cleanHand();
 		}
 		
-		for (int i=0;i<7;i++) {//7 cartas para cada jugador
-			for (Player p : players) {
+		for (int i=0;i<7;i++) {
+			for (Player player : players) {
 				checkIfDeckIsEmpty();
-				p.draw(deck.getCards().remove(0)); //roba la carta de arriba del mazo
+				player.draw(deck.getCards().remove(0));
 			}
+			
 		}
 		
-		discardPile.add(deck.getCards().remove(0));//la carta de descarte inicial (boca arriba en el centro de la mesa)
+		discardPile.add(deck.getCards().remove(0));
 	}
-
+	
 	@Override
-	public void playNewRound() {//una ronda tiene varios turnos
-		
-		boolean endRound = false;
-		int turnCount = 1;
+	public void playNewRound() {
+		boolean endRound = false,closeRound;
+		int roundScore, turnNumber = 1;
 		discardPile = new ArrayList<>();
+		Player current;
 		
 		distributeCards();
 		
-		while(!endRound) {
-			console.showFormattedMessage("----- Turno %d -----\n", turnCount);;
-			for (Player p : players) {
-				playTurn(p, turnCount);
+		while (!endRound) {
+			console.showFormattedMessage("\n===== Turno %d =====\n",turnNumber);
+			
+			for (int i=0;i<players.size() && !endRound;i++) {
+				current = players.get(i);
+				closeRound = playTurn(current,turnNumber);
 				
-				if (turnCount>1 && canEndRound(p,false)) { //problema de flujo, después del turno 1 asume la respuesta "si" a "¿quieres cerrar ronda?"
+				if (closeRound) {
 					endRound = true;
+					
+					roundScore = current.calculateCloseScore();
+					
+					//en Player, la puntuación MIN_VALUE equivale a chinchón
+					if (roundScore == Integer.MIN_VALUE) {
+						chinchonWin = true;
+						winner = current;
+						showRoundResults(current,roundScore);
+					}else {
+						winner = current;
+						current.setScore(current.getScore()+roundScore);
+						showRoundResults(current,roundScore);
+					}
 				}
 			}
-			turnCount++;
-		
+			
+			turnNumber++;
 		}
-		//cuando alguien haya cerrado, se muestran los resultados
-		showRoundResults();
+	}
+	
+	@Override
+	public boolean playTurn(Player player, Integer turn) {
+		if (player instanceof IA) {
+			playTurnIA(player,turn);
+			return false;
+		}
+		
+		return playTurnPerson(player,turn);
+	}
+	
+	//true si el jugador cierra ronda este turno
+	private boolean playTurnPerson(Player player, int turn) {
+		int option;
+		Card drawn, toDiscard;
+		int discardIndex;
+		
+		console.showFormattedMessage("\n--- Turno de %s ---\n",player.getName());
+		console.showFormattedMessage("Carta en el descarte: %s\n",discardPile.getLast());
+		player.showHand();
+		
+		//robar
+		console.showFormattedMessage("¿Robas del (1)MAZO o del (2)DESCARTE (%s)?\n", discardPile.getLast());
+		option = console.readIntInRange(1, 2);
+		
+		if (option == 1) {
+			checkIfDeckIsEmpty();
+			drawn = deck.getCards().remove(0);
+			player.draw(drawn);
+			console.showFormattedMessage("%s roba del MAZO\n",player.getName());
+		}else {
+			drawn = discardPile.removeLast();
+			player.draw(drawn);
+			console.showFormattedMessage("%s roba el %s del DESCARTE\n",player.getName(),drawn);
+		}
+		
+		//descartar
+		console.showMessage("Elige el índice de la carta que quieres descartar: ");
+		player.showHand();
+		discardIndex = console.readIntInRange(0, player.getHand().size()-1);
+		
+		toDiscard = player.getHand().get(discardIndex);
+		player.discard(toDiscard);
+		discardPile.add(toDiscard);
+		console.showFormattedMessage("%s descarta el %s\n",player.getName(),toDiscard);
+		
+		//cerrar ronda
+		if (turn>1 && player.canClose()) {
+			console.showMessage("Puedes cerrar ronda, ¿quieres hacerlo? (S/N)");
+			if (console.readBooleanUsingChar('s', 'n')) {
+				return true;
+			}
+		}else if (turn > 1 && !player.canClose()) {
+			console.showMessage("No tienes combinaciones suficientes para cerrar ronda");
+		}
+		
+		return false;		
+		
+	}
+	
+	private void playTurnIA(Player ia, int turn) {
+		int random = (int) (Math.random()*ia.getHand().size());
+		Card toDiscard;
+		
+		console.showFormattedMessage("\n--- Turno de la IA ---\n");
+		checkIfDeckIsEmpty();
+		
+		//IA roba
+		ia.draw(deck.getCards().remove(0));
+		console.showMessage("La IA roba del MAZO");
+		
+		//IA descarta
+		toDiscard = ia.getHand().get(random);
+		ia.discard(toDiscard);
+		discardPile.add(toDiscard);
+		console.showFormattedMessage("La IA descarta: %s\n",toDiscard);
 		
 	}
 	
 	@Override
-	public void playTurn(Player player,Integer turn) {
+	public void showRoundResults(Player closer, int closerScore) {
+		int points, leftoverPoints;
 		
-		if (player instanceof IA) {
-			playTurnIA(player,turn);
+		console.showMessage("===== RESULTADOS DE LA RONDA =====");
+		
+		//en Player MIN_VALUE significa chinchón
+		if (closerScore == Integer.MIN_VALUE) {
+			console.showFormattedMessage("CHINCHÓN... El ganador es %s.\n", closer.getName());
+		}else if (closerScore == -10) {
+			console.showFormattedMessage("%s ha cerrado con 7 cartas combinadas (-10 puntos). Puntuación: %d\n", closer.getName(),closer.getScore());
+	
 		}else {
-			playTurnPerson(player,turn);
+			console.showFormattedMessage("%s cierra la ronda (+%d puntos). Puntuación: %d\n", closer.getName(),closerScore,closer.getScore());
 		}
+		
+		if (closerScore != Integer.MIN_VALUE) {
+			for (Player player : players) {
+				if (player != closer) {
+					points = player.calculateCloseScore();
+					leftoverPoints = player.getLeftoverScore();
+					player.setScore(player.getScore()+leftoverPoints);
+					console.showFormattedMessage("%s suma %d puntos por cartas no combinadas. Puntuación total: %d\n", player.getName(),leftoverPoints,player.getScore());
+				}
+			}
+		}
+		
+		console.showFormattedMessage("Puntuación límite: %d\n", maxScore);
+		console.showMessage("==================================");
+	}
+	
+	@Override
+	public void eliminatePlayer() {
+		List<Player> eliminated = new ArrayList<>();
+		
+		for (Player player : players) {
+			if (player.getScore()>=maxScore) {
+				eliminated.add(player);
+				console.showFormattedMessage("%s ha sido eliminado con %d puntos.\n", player.getName(),player.getScore());
+			}
+		}
+		
+		players.removeAll(eliminated);
 	}
 	
 	private void checkIfDeckIsEmpty() {
 		Card topDiscard;
 		
 		if (deck.getCards().isEmpty()) {
-			topDiscard = discardPile.remove(discardPile.size()-1);
+			topDiscard = discardPile.removeLast();
 			deck.getCards().addAll(discardPile);
 			deck.shuffle();
 			discardPile.clear();
 			discardPile.add(topDiscard);
-			console.showMessage("No quedan cartas en el mazo, se han barajado del descarte.");
+			console.showMessage("El mazo estaba vacío, se ha barajado con las del descarte.");
 		}
-		
 	}
-	
-	//la IA por ahora solo roba la carta del mazo y se descarta la primera carta, nunca cierra
-	private boolean playTurnIA(Player ia, Integer turn) {
-		Card toDiscard;
-		int random = (int) (Math.random()*ia.getHand().size());
-		
-		console.showMessage("Turno de la IA");
-		checkIfDeckIsEmpty();
-		
-		//decisón de robar:
-		ia.draw(deck.getCards().remove(0));
-		console.showMessage("La IA ha robado una carta del mazo");
-		
-		//decisión de descarte:
-		toDiscard = ia.getHand().get(random);
-		ia.discard(toDiscard);
-		discardPile.add(toDiscard);
-		
-		console.showFormattedMessage("La IA ha descartado: %s\n", toDiscard);
-		
-		return false;
-	}
-
-	private boolean playTurnPerson(Player player,Integer turn) {
-		int option;
-		Card toDiscard, drawCard; //la carta que se quiere descartar
-		boolean hasClosed = false;
-		
-		console.showFormattedMessage("Turno de %s\n", player.getName());
-		player.showHand();
-		
-		//primera acción del turno: robar
-		console.showFormattedMessage("1. Robar del mazo || 2. Robar del descarte( %s )\n",discardPile.getLast());
-		option = console.readIntInRange(1, 2);
-		
-		if (option==1) {//robar del mazo
-			checkIfDeckIsEmpty();
-			drawCard = deck.getCards().remove(0);
-			player.draw(drawCard);
-			console.showFormattedMessage("Carta robada del mazo: %s\n",drawCard);
-
-		}else {//robar del descarte
-			player.draw(discardPile.removeLast());
-
-		}
-		
-		//segunda acción del turno: cerrar (si puede)
-		if (turn>1) {
-			hasClosed = canEndRound(player,true);
-		}
-		
-		if (!hasClosed) {
-			player.showHand();
-			
-			console.showMessage("Elige la carta que quieres descartar (0-7)");
-			
-			toDiscard = player.getHand().get(console.readIntInRange(0, 7));
-			player.discard(toDiscard);
-			discardPile.add(toDiscard);
-			
-		}	
-		
-		return hasClosed;
-		
-	}
-	
-	//REFACTORIZANDO EN PLAYER
-	private boolean isSequence(List<Card> cards) {
-		if (cards.size()<3) {
-			return false;
-		}
-		
-		//ordeno las cartas para comprobar luego más fácil si es una escalera
-		cards.sort((c1,c2) -> Integer.compare(c1.getNumber().getValue(), c2.getNumber().getValue()));
-		
-		for (int i=0;i<cards.size()-1;i++) {
-			
-			//si los palos de las cartas no son los mismos
-			if (cards.get(i).getSuit() != cards.get(i+1).getSuit()) {
-				return false;
-			}
-			
-			//si los números no son consecutivos
-			if (cards.get(i).getNumber().ordinal()+1 != cards.get(i+1).getNumber().ordinal()) {//.ordinal porque si no, 7 y 10 no cuentan como consecutivos, asi uso el orden del enum
-				return false;
-			}			
-		}
-		return true;
-	}
-	//REFACTORIZANDO EN PLAYER
-	private boolean isValidCombination(List<Card> cards) { //falta comprobar si el jugador tiene chinchón
-		boolean sameNumber = false;
-		int firstCard = cards.get(0).getNumber().getValue();
-		
-		if (cards.size()<3) {
-			return false;
-		}
-		
-		//compruebo si son el mismo número
-		for (int i = 0;i<cards.size();i++) {
-			if (cards.get(i).getNumber().getValue() == firstCard) {
-				sameNumber = true;
-			}
-		}
-		
-		return sameNumber || isSequence(cards);
-		
-		
-	}
-	
-	private boolean checkIfCanClose(Player player,int combine,List<Card> remaining,List<Card> selected) {
-		boolean canClose = false;
-		int index;
-		Card discard;
-		
-		if (combine == 7) {				
-			
-			sevenClosed=true;
-			chinchonWin = isSequence(selected);
-			canClose = true;
-			player.discard(remaining.get(0));
-			discardPile.add(remaining.get(0));
-			
-		}else {//si se combina con 6
-			
-			if (remaining.get(0).getNumber().getValue() <= 5) {
-				
-				console.showFormattedMessage("Cierre de 6 válido. Elige qué carta descartar (0-1) (%s - %s)\\n", remaining.get(0),remaining.get(1));
-				index = console.readIntInRange(0, 1);
-				discard = remaining.remove(index);
-				leftCard = remaining.get(0);
-				
-				if (leftCard.getNumber().getValue()<=5) {
-					player.discard(discard);
-					discardPile.add(discard);
-					canClose = true;
-				}else {
-					console.showMessage("ERROR: La carta que queda al intentar cerrar debe ser menor o igual que 5");
-				}
-				
-			}
-			remaining = new ArrayList<>(player.getHand());
-			remaining.removeAll(selected);
-			leftCard = remaining.get(0);
-			
-			if (leftCard.getNumber().getValue()<=5) {
-				canClose = true;				
-			}else {
-				console.showMessage("No puedes cerrar si la carta que sobra no es menor o igual que 5");
-			}
-		}
-		return canClose;
-	}
-	
-	@Override
-	public boolean canEndRound(Player player, boolean beforeDiscard) {// true si el jugador reune las condiciones para cerrar ronda
-		
-		boolean attempt=false,close=false,choise,group=false;
-		sevenClosed=false;
-		chinchonWin=false;
-		leftCard=null;
-		int combine, index=0;
-		List<Card> selected = new ArrayList<>();
-		List<Card> remaining = new ArrayList<>(player.getHand());
-		List<Card> combinedHand = new ArrayList<>();
-		
-		if (player instanceof IA) {//para que la IA nunca cierre (provisional)
-			return false;
-		}
-		
-		//si la llamada a canEndRound la hacen antes de que el jugador haya descartado, entrará en el if
-		if (!beforeDiscard) {//así evito que se pregunte dos veces en la misma ronda al usuario si quiere cerrar 
-			console.showMessage("¿Quieres cerrar la ronda? (S/N)");
-			choise = console.readBooleanUsingChar('s', 'n');		
-			
-			if (choise) {
-				attempt = true;
-			}
-		}
-		
-		while (!close && attempt) {
-				console.showMessage("¿Cierras con 6 o 7 cartas?");
-				combine = console.readIntInRange(6, 7);
-				/*TODO:
-				 * El flujo del bucle debe ser:
-				 * 	1º -> elige carta para añadir al grupo (o cierra grupo)
-				 *  2º -> cuando cierra grupo, comprueba si es una combinación válida
-				 *  3º -> si es una combinación válida, mover las cartas de la mano a "mano combinada"
-				 *  4º -> vuelve a preguntar la carta a añadir, pero ahora solo con las cartas en la mano, quitando las que ya están combinadas
-				 *  5º 
-				 *  	si combine == 6 -> cuando quede una carta, valida la combinación automáticamente
-				 *  	si combine == 7 -> cuando no queden cartas, valida la combinación automáticamente
-				 *  
-				 *   
-				 *   COMPROBACIONES:
-				 *   -    
-				 * 
-				 */
-				while (!group) {
-						combinedHand.toString();
-						//player.showHand();
-					
-						//hay que poner una opción de "hasta aquí el primer grupo", para que el usuario pueda hacer combinaciones pequeñas
-						console.showMessage("Elige una carta (0-6) (7 cuando ya hayas seleccionado el grupo)");
-						index=console.readIntInRange(0, 7);
-						
-						
-						
-						//si el usuario decide que ya ha elegido el primer grupo, se valida que dicho grupo es una combinación válida
-						if (index == 7) {
-							//paso por parámetro la mano temporal a isValidCombination
-							if (!isValidCombination(combinedHand)) {//si la mano temporal no es válida, la vacía
-								
-								console.showMessage("ERROR: No se ha podido cerrar el grupo");
-								combinedHand.clear();
-							}
-						}else {
-							//cada carta elegida hay que añadirla a una mano temporal
-							combinedHand.add(player.getHand().get(index));
-						}						
-						
-						selected.add(remaining.remove(index));
-				}
-				/*
-				if (isValidCombination(selected)) {
-					
-					if (combine == 7) {				
-						
-						sevenClosed=true;
-						chinchonWin = isSequence(selected);
-						close = true;
-						player.discard(remaining.get(0));
-						discardPile.add(remaining.get(0));
-						
-					}else {//si se combina con 6
-						
-						if (remaining.get(0).getNumber().getValue() <= 5) {
-							
-							console.showFormattedMessage("Cierre de 6 válido. Elige qué carta descartar (0-1) (%s - %s)\\n", remaining.get(0),remaining.get(1));
-							index = console.readIntInRange(0, 1);
-							discard = remaining.remove(index);
-							leftCard = remaining.get(0);
-							
-							if (leftCard.getNumber().getValue()<=5) {
-								player.discard(discard);
-								discardPile.add(discard);
-								close = true;
-							}else {
-								console.showMessage("ERROR: La carta que queda al intentar cerrar debe ser menor o igual que 5");
-							}
-							
-						}
-						remaining = new ArrayList<>(player.getHand());
-						remaining.removeAll(selected);
-						leftCard = remaining.get(0);
-						
-						if (leftCard.getNumber().getValue()<=5) {
-							close = true;				
-						}else {
-							console.showMessage("No puedes cerrar si la carta que sobra no es menor o igual que 5");
-						}
-					}
-						
-					}else {
-						console.showMessage("Combinación no válida. Deben tener el mismo número (3 o más) o ser una escalera válida del mismo palo (3 o más)");
-					}
-					*/
-		}
-		
-		return close;
-		
-	}
-	
-	@Override
-	public void eliminatePlayer() {//si ha superado la puntuación máxima, se elimina
-		players.removeIf(p -> p.getScore()>=maxScore);
-	}
-
-	@Override
-	public void showRoundResults() {//se muestran las puntuaciones
-		int points=0;
-		
-		console.showMessage("----- RESULTADOS DE LA RONDA -----");
-		
-		for (Player p : players) {
-			if (p == winner) {
-				if (sevenClosed) {
-					//si ha hecho una combinación de 7 cartas
-					p.setScore(p.getScore()-10);
-					if (p.getScore()<0) {
-						p.setScore(0);
-					}
-					console.showFormattedMessage("%s ha cerrado con 7 cartas (-10 puntos). Puntuación: %d\n", p.getName(),p.getScore());
-					
-				}else if(leftCard != null){
-					points = leftCard.getNumber().getValue();
-					p.setScore(p.getScore()+points);
-					console.showFormattedMessage("%s ha cerrado con 6 cartas (+%d puntos). Puntuación: %d\n", p.getName(),points,p.getScore());
-					
-				}
-			}else {
-				points = calculatePlayerScore(p);
-				p.setScore(p.getScore()+points);
-				console.showFormattedMessage("%s: %d puntos\n", p.getName(),p.getScore());
-				
-			}
-			
-		}
-		
-	}
-	//REFACTORIZANDO EN PLAYER
-	private int calculatePlayerScore(Player player) {
-		List<Card> remaining = new ArrayList<>(player.getHand());
-		List<Card> selectedCards;
-		List<Integer> selectedIndex;
-		boolean combine = true;
-		int count, index, sum;
-		
-		//primero compruebo si el jugdor es la IA
-		if (player instanceof IA) {
-			return calculateIAScore(player);
-		}
-		
-		console.showFormattedMessage("%s, combina las cartas que puedas en tu mano\n", player.getName());
-		
-		while (combine && remaining.size()>=3){
-			console.showFormattedMessage("Cartas en mano: %s\n", remaining);
-			console.showMessage("¿Puedes hacer alguna combinación? (S/N)");
-			
-			if (console.readBooleanUsingChar('s', 'n')) {
-				console.showFormattedMessage("¿Cuántas cartas están en la combinación? (3-%d)\n", remaining.size());
-				count = console.readIntInRange(3, remaining.size());
-				
-				selectedCards = new ArrayList<>();
-				selectedIndex = new ArrayList<>();
-				
-				for (int i = 1; i<=count; i++) {
-					index=0;
-					do {
-						console.showFormattedMessage("Elige el índice de la carta %d (0-%d)\n",i,remaining.size()-1);
-						index = console.readIntInRange(0, remaining.size()-1);
-						if (selectedIndex.contains(index)) {
-							console.showMessage("Esa carta ya la has elegido antes");
-						}
-					}while (selectedIndex.contains(index));
-					
-					selectedIndex.add(index);
-					selectedCards.add(remaining.get(index));
-				}
-				
-				if (isValidCombination(selectedCards)) {
-					
-					console.showMessage("Combinación válida");
-					selectedIndex.sort((a,b) -> Integer.compare(b, a)); //las ordeno al revés para borrar las últimas cartas y no estropear el índice
-					for (int cardPosition : selectedIndex) {
-						remaining.remove(cardPosition);
-					}
-				}else {
-					console.showMessage("Combinación no válida. Prueba otra combinación o pulsa 'N' para terminar");
-				}
-			}else {
-				combine = false;
-			}
-		}
-		
-		sum = 0;
-		for (Card c : remaining) {
-			sum += c.getNumber().getValue();
-		}
-		return sum;
-		
-	}
-	//REFACTORIZANDO EN PLAYER
-	private int calculateIAScore(Player player) {
-		List<Card> hand = new ArrayList<>(player.getHand()),sameValueCards,suitCards;
-		int points=0;
-		
-		//la IA busca combinaciones de iguales en su mano
-		for (int i=0;i<hand.size();i++) {
-			int val = hand.get(i).getNumber().getValue(); //tengo que declarar val dentro del for porque necesita ser eficazmente final
-			sameValueCards = hand.stream()
-					.filter(card -> card.getNumber().getValue() == val)
-					.collect(Collectors.toList());
-			
-			if (sameValueCards.size() >= 3) {
-				hand.removeAll(sameValueCards);
-			}
-		}
-		
-		//la IA busca escaleras en su mano
-		for (Suit suit : Suit.values()) {
-			suitCards = hand.stream()
-					.filter(card -> card.getSuit() == suit)
-					.sorted((card1,card2) -> Integer.compare(card1.getNumber().ordinal(), card2.getNumber().ordinal()))
-					.collect(Collectors.toList());
-			
-			if (suitCards.size() >= 3) {
-				if (isSequence(suitCards)) {
-					hand.removeAll(suitCards);
-				}
-			}
-		}
-		
-		for (Card c : hand) {
-			points += c.getNumber().getValue();
-		}
-		
-		return points;
-		
-	}
-	/**
-	 * TODO: 
-	 * Refactorizar 
-	 * Optimizar
-	 * Actualizar UML 
-	 * 
-	 * - Hacer que se pueda cerrar ronda. Actualmente no detecta las combinaciones.
-	 */
-	
 }
