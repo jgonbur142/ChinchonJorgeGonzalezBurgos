@@ -33,6 +33,7 @@ public class Player implements IPlayer{
 		}		
 	}
 
+	@Override
 	public void calculateScore() {
 		int points=0;
 		
@@ -78,7 +79,7 @@ public class Player implements IPlayer{
 		return true;
 	}
 	
-	//comprueba si hay chinchón en la mano
+	@Override
 	public boolean isChinchon() {
 		List<Card> sorted = new ArrayList<>(hand);
 		
@@ -93,12 +94,21 @@ public class Player implements IPlayer{
 	}
 	
 	private void findBestCombination(List<Card> remaining, List<List<Card>> bestResult) {
+		boolean foundCombination = false;
 		List<List<Card>> subsets;
 		List<Card> next;
 		
 		//caso base, no quedan cartas: return
 		if (remaining.isEmpty()) {
 			bestResult.set(0, new ArrayList<>());
+			return;
+		}
+		
+		//caso base, quedan 1 o 2 cartas que no se pueden combinar
+		if (remaining.size()<3) {
+			if (bestResult.get(0) == null || sumValues(remaining)<sumValues(bestResult.get(0))) {
+				bestResult.set(0,new ArrayList<>(remaining));
+			}
 			return;
 		}
 		
@@ -123,7 +133,9 @@ public class Player implements IPlayer{
 					}
 				}
 			}
-			
+		}
+		
+		if (!foundCombination) {
 			if (bestResult.get(0) == null || sumValues(remaining) < sumValues(bestResult.get(0))) {
 				bestResult.set(0,new ArrayList<>(remaining));
 			}
@@ -172,11 +184,12 @@ public class Player implements IPlayer{
 		
 	}
 	
+	@Override
 	public int getLeftoverScore() {
 		return sumValues(obtainLeftOverCards());
 	}
 	
-	//comprobar si el jugador puede cerrar
+	@Override
 	public boolean canClose() {
 		List<Card> leftovers = obtainLeftOverCards();				
 		
@@ -200,7 +213,7 @@ public class Player implements IPlayer{
 		
 	}
 	
-	//calcular la puntuación al cerrar el jugador
+	@Override
 	public int calculateCloseScore() {
 		List<Card> leftovers = obtainLeftOverCards();
 		

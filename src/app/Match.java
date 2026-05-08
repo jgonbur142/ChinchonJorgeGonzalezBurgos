@@ -2,7 +2,6 @@ package app;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 import resources.Card;
 import resources.Deck;
 import resources.IA;
@@ -19,8 +18,7 @@ public class Match implements IMatch{
 	private Player winner;
 	private boolean chinchonWin;
 	
-	private Scanner kb = new Scanner(System.in);
-	private ConsoleInput console = new ConsoleInput(kb);
+	private ConsoleInput console = ConsoleInput.getInstance();
 	
 	public IMatch createMatch(int option) {	//factory
 		
@@ -121,9 +119,13 @@ public class Match implements IMatch{
 
 	@Override
 	public void start() {
+		configureMaxScore();
+		
 		while (players.size()>1 && !chinchonWin) {
 			playNewRound();
-			eliminatePlayer();
+			if (!chinchonWin) {
+				eliminatePlayer();
+			}
 		}
 		
 		if (chinchonWin) {
@@ -272,7 +274,7 @@ public class Match implements IMatch{
 	
 	@Override
 	public void showRoundResults(Player closer, int closerScore) {
-		int points, leftoverPoints;
+		int leftoverPoints;
 		
 		console.showMessage("===== RESULTADOS DE LA RONDA =====");
 		
@@ -289,7 +291,6 @@ public class Match implements IMatch{
 		if (closerScore != Integer.MIN_VALUE) {
 			for (Player player : players) {
 				if (player != closer) {
-					points = player.calculateCloseScore();
 					leftoverPoints = player.getLeftoverScore();
 					player.setScore(player.getScore()+leftoverPoints);
 					console.showFormattedMessage("%s suma %d puntos por cartas no combinadas. Puntuación total: %d\n", player.getName(),leftoverPoints,player.getScore());

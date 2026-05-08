@@ -1,14 +1,11 @@
 package app;
 
-import java.util.Scanner;
-
 public class Menu {
 	
-	private Scanner kb = new Scanner(System.in);
 	private ConsoleInput console;
 	
 	public Menu() {
-		console = new ConsoleInput(kb);
+		console = ConsoleInput.getInstance();
 	}
 	
 	public void startGame() {

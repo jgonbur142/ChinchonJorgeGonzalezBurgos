@@ -4,10 +4,18 @@ import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class ConsoleInput {
+	private static ConsoleInput instance;
 	private Scanner keyboard;
 	
-	public ConsoleInput (Scanner keyboard) {
-		this.keyboard=keyboard;
+	private ConsoleInput () {
+		this.keyboard=new Scanner(System.in);
+	}
+	
+	public static ConsoleInput getInstance() {
+		if (instance == null) {
+			instance = new ConsoleInput();
+		}
+		return instance;
 	}
 	
 	private void cleanInput() { //limpia el teclado

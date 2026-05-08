@@ -25,7 +25,7 @@ public class Card {
 
 	@Override
 	public String toString() {
-		return String.format("Número: %d, Palo: %s",number.getValue(),suit.getSymbol());
+		return String.format("%d %s",number.getValue(),suit.getColoredSymbol());
 	}
 	
 	
