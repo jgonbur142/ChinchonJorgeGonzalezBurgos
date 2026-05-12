@@ -7,6 +7,11 @@ import resources.Deck;
 import resources.IA;
 import resources.Player;
 
+/**
+ * Clase base que representa una partida de Chinchón.
+ * Implementa la lógica común del juego e incluye un método factoría
+ * para crear distintos tipos de partida.
+ */
 public class Match implements IMatch{
 	
 	protected Deck deck;
@@ -20,6 +25,12 @@ public class Match implements IMatch{
 	
 	private ConsoleInput console = ConsoleInput.getInstance();
 	
+	/**
+	 * Factoría que crea y devuelve el tipo de partida correspondiente
+	 * según la opción elegida por el usuario en el menú.
+	 * @param option número de opción seleccionada en el menú
+	 * @return instancia de IMatch configurada, o null si se elige salir
+	 */
 	public IMatch createMatch(int option) {	//factory
 		
 			switch (option) {
@@ -112,6 +123,9 @@ public class Match implements IMatch{
 			
 		}
 	
+	/**
+	 * Solicita al usuario la puntuación máxima que determina la eliminación de jugadores.
+	 */
 	private void configureMaxScore() {
 		console.showMessage("Introduce la puntuación máxima de la partida: ");
 		maxScore = console.readInt();
@@ -204,7 +218,13 @@ public class Match implements IMatch{
 		return playTurnPerson(player,turn);
 	}
 	
-	//true si el jugador cierra ronda este turno
+	/**
+	 * Gestiona el turno de un jugador humano: le permite robar del mazo o del descarte,
+	 * descartar una carta de su mano y, si procede, cerrar la ronda.
+	 * @param player jugador humano que realiza el turno
+	 * @param turn número de turno actual
+	 * @return true si el jugador decide cerrar la ronda, false en caso contrario
+	 */
 	private boolean playTurnPerson(Player player, int turn) {
 		int option;
 		Card drawn, toDiscard;
@@ -253,6 +273,11 @@ public class Match implements IMatch{
 		
 	}
 	
+	/**
+	 * Gestiona el turno de la IA: roba siempre del mazo y descarta una carta aleatoria de su mano.
+	 * @param ia jugador IA que realiza el turno
+	 * @param turn número de turno actual
+	 */
 	private void playTurnIA(Player ia, int turn) {
 		int random = (int) (Math.random()*ia.getHand().size());
 		Card toDiscard;
@@ -316,6 +341,10 @@ public class Match implements IMatch{
 		players.removeAll(eliminated);
 	}
 	
+	/**
+	 * Comprueba si el mazo está vacío y, en caso afirmativo, lo reconstruye
+	 * barajando las cartas del descarte, dejando la última carta del descarte en su sitio.
+	 */
 	private void checkIfDeckIsEmpty() {
 		Card topDiscard;
 		

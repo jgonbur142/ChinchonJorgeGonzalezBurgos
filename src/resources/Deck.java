@@ -32,15 +32,11 @@ public class Deck {
 	public void shuffle() {
 		Collections.shuffle(cards);
 	}
-	
-	public void giveCard() {
-		/*
-		 * reparte las cartas 
-		 * (no puedo simplemente crear una baraja nueva porque tengo que tener en cuenta las cartas que tienen los jugadores en la mano)
-		 * (esas no pueden volver a estar en la baraja)
-		 */
-	}
 
+	/**
+	 * Devuelve la lista de cartas que quedan en la baraja.
+	 * @return lista de cartas disponibles
+	 */
 	public List<Card> getCards() {
 		return cards;
 	}	

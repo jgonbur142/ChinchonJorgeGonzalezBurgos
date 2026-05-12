@@ -16,31 +16,35 @@ public interface IPlayer {
 	void discard(Card card);
 	
 	/**
-	 * 
+	 * Suma a la puntuación acumulada el valor de todas las cartas en mano
 	 */
 	void calculateScore();
 	
 	/**
-	 * comprueba si hay chinchón en la mano
-	 * @return
+	 * Comprueba si hay chinchón en la mano (7 cartas de valor consecutivo y mismo palo)
+	 * @return {@code true} si hay chinchón, {@code false} en caso contrario
 	 */
 	boolean isChinchon();
 	
 	/**
-	 * 
-	 * @return
+	 * Calcula la suma de los valores de las cartas que no forman ninguna combinación
+	 * @return puntuación de las cartas sobrantes
 	 */
 	int getLeftoverScore();
 	
 	/**
-	 * comprobar si el jugador puede cerrar
-	 * @return
+	 * Comprueba si el jugador puede cerrar ronda con su mano actual:
+	 * debe tener al menos 6 cartas combinadas y la sobrante (si existe) no puede superar el valor 5
+	 * @return {@code true} si puede cerrar, {@code false} en caso contrario
 	 */
 	boolean canClose();
 	
 	/**
-	 * calcular la puntuación al cerrar el jugador
-	 * @return
+	 * Calcula la puntuación que obtiene el jugador al cerrar ronda.
+	 * Devuelve {@link Integer#MIN_VALUE} si hay chinchón, -10 si combina las 7 cartas
+	 * o el valor de la carta sobrante en cualquier otro caso.
+	 * @return puntuación de cierre
+	 * @throws IllegalStateException si el jugador no tiene combinaciones suficientes para cerrar
 	 */
 	int calculateCloseScore();	
 	
@@ -69,6 +73,7 @@ public interface IPlayer {
 	
 	/**
 	 * Configura la puntuación del jugador
+	 * @param score nueva puntuación
 	 */
 	void setScore(int score);
 	

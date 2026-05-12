@@ -1,7 +1,14 @@
 package resources;
-//La IA solo es un jugador con el nombre de IA, toda la lógica es la misma
+/**
+ * Representa al jugador controlado por la máquina.
+ * Hereda toda la lógica de {@link Player}; la única diferencia es
+ * que siempre se llama "IA" y su turno lo gestiona {@code Match} de forma automática.
+ */
 public class IA extends Player{
 	
+	/**
+	 * Crea el jugador IA con el nombre predeterminado "IA".
+	 */
 	public IA() {
 		super("IA");
 	}

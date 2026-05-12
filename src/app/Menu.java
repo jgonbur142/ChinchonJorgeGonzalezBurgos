@@ -1,13 +1,24 @@
 package app;
 
+/**
+ * Clase que gestiona el menú principal de la aplicación.
+ * Permite al usuario seleccionar el tipo de partida y la inicia.
+ */
 public class Menu {
 	
 	private ConsoleInput console;
 	
+	/**
+	 * Crea una instancia de Menu obteniendo la consola compartida.
+	 */
 	public Menu() {
 		console = ConsoleInput.getInstance();
 	}
 	
+	/**
+	 * Muestra el menú principal en bucle, crea la partida elegida y la inicia.
+	 * El bucle continúa hasta que el usuario selecciona la opción de salir.
+	 */
 	public void startGame() {
 		Match match = new Match();
 		IMatch current;
@@ -17,8 +28,8 @@ public class Menu {
 			console.showMessage("");
 			showCover();
 			console.showMessage("--------------------------------");
-			console.showMessage("- 1. Un jugador ----------------"); //1 jugador + IA
-			console.showMessage("- 2. Dos jugadores (sin IA) ----"); //2 jugadores o 2 jugadores + IA
+			console.showMessage("- 1. Un jugador ----------------"); 
+			console.showMessage("- 2. Dos jugadores (sin IA) ----"); 
 			console.showMessage("- 3. Dos jugadores (con IA) ----");
 			console.showMessage("- 4. Tres jugadores (sin IA) ---");
 			console.showMessage("- 5. Tres jugadores (con IA) ---");
@@ -38,6 +49,9 @@ public class Menu {
 		}while (option!=9);
 	}
 	
+	/**
+	 * Muestra la cabecera del juego con el título y el nombre del autor.
+	 */
 	private void showCover() {
 		console.showMessage("----------------------------------");
 		console.showMessage("             Chinchón             ");

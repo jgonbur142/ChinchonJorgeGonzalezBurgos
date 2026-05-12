@@ -5,7 +5,8 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * Representa a un jugador con el nombre, cartas en mano y puntuación que tendrá a lo largo de una partida
+ * Representa a un jugador con el nombre, cartas en mano y puntuación
+ * que tendrá a lo largo de una partida
  */
 public class Player implements IPlayer{
 
@@ -13,6 +14,10 @@ public class Player implements IPlayer{
 	private List<Card> hand;
 	private int score;
 	
+	/**
+	 * Crea un jugador con el nombre indicado, mano vacía y puntuación 0.
+	 * @param name nombre del jugador
+	 */
 	public Player(String name) {
 		this.name=name;
 		this.hand = new ArrayList<>();
@@ -44,7 +49,12 @@ public class Player implements IPlayer{
 		score += points;
 	}
 	
-	//comprueba si hay combinación de escalera válida
+	/**
+	 * Comprueba si una lista de cartas forma una escalera válida:
+	 * mínimo 3 cartas, mismo palo y valores ordinales consecutivos.
+	 * @param cards lista de cartas a comprobar
+	 * @return {@code true} si forman escalera válida, {@code false} en caso contrario
+	 */
 	private boolean isStraight(List<Card> cards) {
 		
 		if (cards.size()<3) {
@@ -64,7 +74,12 @@ public class Player implements IPlayer{
 		
 	}
 	
-	//comprueba si hay combinación de iguales válida
+	/**
+	 * Comprueba si una lista de cartas forma un grupo de iguales válido:
+	 * mínimo 3 cartas con el mismo valor numérico.
+	 * @param cards lista de cartas a comprobar
+	 * @return {@code true} si todas tienen el mismo valor, {@code false} en caso contrario
+	 */
 	private boolean isSameGroup(List<Card> cards) {
 		if (cards.size()<3) {
 			return false;
@@ -93,6 +108,13 @@ public class Player implements IPlayer{
 		
 	}
 	
+	/**
+	 * Algoritmo recursivo que busca la combinación óptima de cartas en la mano,
+	 * minimizando el valor de las cartas que sobran sin combinar.
+	 * Actualiza {@code bestResult} cuando encuentra un resultado mejor.
+	 * @param remaining  cartas que aún no han sido asignadas a ninguna combinación
+	 * @param bestResult lista de un elemento que almacena el mejor sobrante encontrado hasta ahora
+	 */
 	private void findBestCombination(List<Card> remaining, List<List<Card>> bestResult) {
 		boolean foundCombination = false;
 		List<List<Card>> subsets;
@@ -142,7 +164,12 @@ public class Player implements IPlayer{
 		}
 	}
 	
-	//para validar las escaleras, genero aquí los subconjuntos de cartas
+	/**
+	 * Genera todos los subconjuntos de tamaño {@code size} a partir de {@code cards}.
+	 * @param cards lista de cartas origen
+	 * @param size  tamaño de cada subconjunto
+	 * @return lista de todos los subconjuntos posibles
+	 */
 	private List<List<Card>> generateSubsets(List<Card> cards, int size){
 		List<List<Card>> result = new ArrayList<>();
 		
@@ -150,6 +177,14 @@ public class Player implements IPlayer{
 		return result;
 	}
 	
+	/**
+	 * Método auxiliar recursivo para la generación de subconjuntos por backtracking.
+	 * @param cards   lista de cartas origen
+	 * @param size    tamaño objetivo del subconjunto
+	 * @param start   índice desde el que se empieza a explorar en cada llamada recursiva
+	 * @param current subconjunto que se está construyendo en este momento
+	 * @param result  lista acumuladora donde se añaden los subconjuntos completos
+	 */
 	private void generateSubsetAux(List<Card> cards, int size, int start, List<Card> current, List<List<Card>> result) {
 		if (current.size() == size) {
 			result.add(new ArrayList<>(current));
@@ -163,6 +198,11 @@ public class Player implements IPlayer{
 		}
 	}
 	
+	/**
+	 * Suma los valores numéricos de una lista de cartas.
+	 * @param cards lista de cartas a sumar
+	 * @return suma total de los valores
+	 */
 	private int sumValues(List<Card> cards) {
 		int total=0;
 		for (Card card : cards) {
@@ -171,6 +211,11 @@ public class Player implements IPlayer{
 		return total;
 	}
 	
+	/**
+	 * Calcula y devuelve las cartas de la mano que no pertenecen a ninguna
+	 * combinación válida, minimizando su valor total.
+	 * @return lista de cartas sobrantes con el menor valor posible
+	 */
 	private List<Card> obtainLeftOverCards(){
 		List<Card> sorted = new ArrayList<>(hand);
 		List<List<Card>> bestResult = new ArrayList<>();
@@ -244,6 +289,10 @@ public class Player implements IPlayer{
 		return hand;
 	}
 	
+	/**
+	 * Muestra por consola las cartas de la mano del jugador con su índice,
+	 * para que pueda elegir cuál descartar.
+	 */
 	public void showHand() {
 		for (int i = 0;i<hand.size();i++) {
 			System.out.printf("[%d] %s\n",i,hand.get(i));
